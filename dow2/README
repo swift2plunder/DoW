@@ -1,0 +1,49 @@
+This is an abandoned attempt at DOW2, where the primary new feature is
+allowing each member to choose what info they share with every ship at
+a fairly fine level. It also implements database views such that each
+member can access the database directly, and only see the information
+that is legal for him to see according to all other members' sharing
+settings.
+
+This will likely only work with postgresql, since I'm depending on
+details of user and group handling. Specifically, I depend on the
+postgresql variable 'user', which contains the currently logged in
+user. This allows us to join views on the current user. For example,
+
+dow2=# CREATE VIEW udonors as (select * from alldonors where ship=user);
+
+This causes the view "udonors" to consist of only the row in the
+alldonors table where the 'ship' column is equal to the currently
+logged user (e.g. "Mad Ninja"). By default, users cannot access *any*
+tables. To allow members to see their views, we execute:
+
+dow2=# GRANT SELECT ON udonors TO GROUP users;
+
+Each DOW2 member must be in group 'users'. For example:
+
+dow2=# CREATE USER "Mad Ninja" IN GROUP users PASSWORD 'super_secret';
+
+
+The problem with this approach is that the various sharing tables get
+really big really fast, since for each piece of information, we need
+to store a list of the ships that can legally view that information.
+I've tried some ways to optimize this, but I'm not sure if it's really
+feasible. It would be very nice if it worked, however, since then
+other people could write scripts for DOW2 and host them on their own
+sites, only accessing DOW2 to grab the data they can legally see.
+
+----------------------------------------------------------------------
+
+The schema is a bit better than with DOW, and incorporates some
+features such as DOMAINs and VIEWs that make management easier.
+
+The concept of "information id" a.k.a. iid is critical. Each piece
+of information that can be shared is given a unique id (from the
+iid_seq auto incrementing sequence). This iid is then entered into the
+"shared" table for each and every ship that is allowed to view this
+piece of data according to the sharing settings of the donating ship.
+Obviously, this means the "shared" table is huge".
+
+As is typical, the "ushared" view contains only the elements of "shared"
+for the particular user that's currently accessing the database.
+

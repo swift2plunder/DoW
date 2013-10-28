@@ -1,0 +1,3832 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Database Schema for DOW</title>
+</head>
+<body>
+<h1>Database Schema for DOW</h1>
+
+<p>The following is an annoated schema for DOW generated automatically
+from the database itself. I've edited it lightly to remove a few
+extraneous things such as tables that are no longer used, experimental
+tables, the forums, trade board, April Fools jokes, etc.
+
+<p>Overall comments:
+
+The distinction between where to put donor data and where to put other
+data was not well thought out. There are many places where I should
+have stored ship name rather than donorid, so that if the data is
+available for non-donors, there's somewhere to put it.
+
+When table entries get unique ids and when they do not is also
+haphazard.
+
+Although turn information is cached back to turn 1004, I did not
+generally reparse historic data when I added new tables.
+<hr>
+<table border><tr><th align=left>Name</th><th align=left>Type</th><th align=left>Comment</th></tr>
+<tr valign=top>
+ <td><a href="#t1">activeships</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores the ships that appear to still be active in the game by extracting them from the TBG mailer at: http://www.pbm.com/tbg/alias.html</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t2">adventures</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Every time an adventure is seen, either from the location report if you're in system or from the "Known Adventures", it is entered into this table. The donation flags indicate who is allowed to view the adventure. As the player pages are processed, the permisions will become more lenient (e.g. when a player who donates all adventures reports the adventure, all the flags get set to true).</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t3">aliens</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores static info about alien races. Ships are created with skilllevel modules plus or minus 1 min 1 max 6.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t4">allships</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>For every ship that's ever been seen in DOW on or before the given turn, list the ships status (one of Alien, Player, Retired). It is much faster to store this info once than to generate it each time.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t5">artifacts</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Artifacts carried by donors. I should have used ship name instead of donorid. Curses are stored in TABLE curses, with a reference to the artifactid. Keys are stored in TABLE keys, with a reference to the artifactid.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t6">badland</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores the danger level for each badland. Not currently used by anything.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t7">banned</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Which ships are banned from dow, when they were banned, etc.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t8">colonies</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores info about each colony.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t9">corona</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores the danger level of each Stellar Corona. Not currently used by anything.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t10">criminals</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Records where criminals have been seen. Note that just because you know a criminal is in a location, you cannot necessarily pick him up. I believe you personally need to have been the one to gain the information about his location.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t11">curses</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores the curses on all artifacts. The artifactid is a reference to an entry in TABLE artifacts.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t12">customsetprefs</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Settings for the Custom Set. Values should have been floats instead of ints.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t14">donors</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Information about members of DOW are stored here. Each member has a unique donorid.
+
+The dow_pw is stored plain text. It is also stored encripted in the .htaccess file. See the script dowpw.pl for how the passwords are maintained.
+
+If adv_all is set, so should adv_*
+
+If admin is set, then most scripts will allow you to add the argument -u+ShipName and look at the script as that ship. Very useful for debugging.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t15">dowaccess</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores every access to a DOW page that contains a remote_user. This table is huge. Good for detecting spies.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t17">enemies</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Records the alien races that a donor is enemies with.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t18">factories</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Static info on which systems product what resources.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t19">favour</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Amount of favour of DOW members</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t20">flags</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>The flag for every non-alien ship</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t24">fragments</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores Starnet password fragments. The source is DOW if obtained from a donor's turn pages. Other sources are entered by hand, and are typically GIN or TC (for terminal codes). The source is not used by anything currently.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t25">frozen</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Lists DOW members who are currently not allowed to access the DOW pages. This includes people who quit the game or quit DOW.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t26">influence</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores influence information for presidential elections.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t27">keys</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores the keys on all artifacts. The artifactid is a reference to an entry in TABLE artifacts.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t28">medicine</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>What medicine is a given ship carrying? Where can it be sold? What's it value?</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t29">meetings</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores ship pairing data. "ship1 (protecting protected1) meets ship2 (protecting protected2)".
+Any ship field except ship1 may be null (e.g. if a ship is alone in a system).</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t30">modules</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Modules carried by donors. I should have used ship name instead of donorid. See TABLE shop for meaning of type and tech. See also TABLE nmods, a replacement for this table used by newer scripts.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t31">newsettings</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Used to store user requested changes to their settings. Rows from this table are copied to TABLE donors when the turn turns.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t32">nmods</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>New table for modules. Currently only includes modules on ships, though it was designed for ships and shops. Updated by do_ships.pl, while TABLE modules is updated by updatedow.pl.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t36">plagues</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Records which plagues a donor has cured.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t37">pods</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores which pods a donor carries. For non-donors, the donorid is null and the ship is set. I really should not have used donorids...</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t38">pollitems</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores the possible things to vote on in a poll. The pollid is a reference to an entry in TABLE polls. See also TABLE pollvotes for who voted for what.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t39">polls</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores poll information. See also TABLE pollitems for what you can vote on in a poll and TABLE pollvotes for who voted for what.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t40">pollvotes</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores what donors voted for in a poll.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t41">popcorn</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Records popcorn sightings.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t42">powerrank</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Records power rank for all ships. Generated by do_ships.pl</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t43">prefs</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>General DOW preferences. This grew organically, and should be cleaned up.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t47">probes</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores where donors have probes deployed. I should have included the turn! Instead, I delete the table every turn and reset with latest values.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t48">purgedsystems</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Records which system had its Starnet purged</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t49">purgesuspects</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Records who was at a system when its Starnet was purged.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t50">rfat</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Used to coordinate the science spell 'Report from All Terminals'. See rfat.pl for how it's used.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t51">rings</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Reports on good and evil ring sightings</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t52">rogues</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores location of rogue bands and associated information.  Note that the location is represented by what is needed to protect you from the danger of the location.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t53">rss</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Route simulator settings. Similar to TABLE customsetprefs. See also comments there.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t54">shipcomments</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores comments from DOW members about other ships.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t55">shipconfig</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores the path to where the ship configuration HTML page is stored. Poor choice of name for the table.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t56">shipdata</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Grab bag of data about donor's ships. Entries have been added as needed rather than designed.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t57">shiploc</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores the locations of ships, including from the turn pages, terminal reports, and trace reports (which is why TABLE meetings is not sufficient, since it only gives the location of the ship, not who it is paired with).</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t58">shop</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores shop data. I should have used a unique ID for each shop. Note that I intended to combine this table into TABLE nmods, but I haven't yet. 
+
+Types:
+Warp 1, impulse 2, sensor 3, cloak 4, life support 5, sickbay 6,
+shield 7, ram 8, gun 9, disruptor 10, laser 11, missile 12, drone 13,
+fighter 14, pod 15.
+
+Techs:
+Primitive 1, Basic 2, Mediocre 3, Advanced 4, Exotic 5, Magic 6.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t59">skills</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores the skill levels of each DOW member. IMPORTANT: Only when a new skill is learned does an entry appear. Each area/name combination should therefore only occur once. BUG: Does not take into account evil ring use!</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t60">starcoords</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Positions of the stars. Note that it is rotated by 90 degrees with respect to how they're displayed. I wish I could remember where I found these values...</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t61">stargates</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores stargate information. Note that both directions are stored in the table (e.g. Alnitak/Zosca/1 and Zosca/Alnitak/1).</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t62">statics</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Various static data. Currently one of: Engineering Academy, Engineering School, Hiring Hall, Medical Academy, Medical School, Ocean, Prison, Science Academy, Science School, Weaponry Academy, Weaponry School.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t63">sysplagues</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Reported level of plagues from donors turn pages.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t64">sysstarnet</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Static list of systems with Starnet terminals.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t65">systemviewed</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores whether the ship pairings in a given system have been reported on a given turn. An entry exists if there's a turn report, probe report, trace report, or terminal report for the system.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t68">terminals</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Records which terminals a donor has accessed.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t69">terrain</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores the terrain type of each system. One of Asteroids, Clear, Dyson Sphere, Nebula</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t70">traces</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores which ship (if any) a DOW member is tracing.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t71">tracking</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Stores which ships a DOW member is tracking.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t72">trade</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Records trade data from player pages, terminal reports, probe reports, and the Presidential database.
+
+IMPORTANT: Since some systems have colonies that buy two of the same
+goods, it is possible to have identical entries (except for the
+tradeid). I should have assigned each colony a unique ID, and used
+that instead of system/resource.
+
+NOTE: The donorid represents who donated the data. It is no longer
+used for anything. It is the donorid if it came from the turn report,
+-1 for the presidential database, or donorid+1000 for terminal
+reports, etc.
+
+NOTE: I added locid about half-way through DOW's life.</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t74">turnupdate</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>Records which turn each donor has contributed. A common idiom to get the current turn is: select max(turn) from turnupdate;</td>
+</tr>
+
+<tr valign=top>
+ <td><a href="#t75">xeno_history</a>&nbsp;&nbsp;</td>
+ <td>TABLE&nbsp;&nbsp;</td>
+ <td>For each Xeno service, store who/what/when. Note that for the scripts to work, there should always be at least one entry for each Xenologist (e.g. "Joined Xenos").</td>
+</tr>
+
+</table>
+
+<hr>
+<h3><a name="t1">TABLE activeships</a></h3>
+<p>Stores the ships that appear to still be active in the game by extracting them from the TBG mailer at: http://www.pbm.com/tbg/alias.html<p>
+
+<table border="1">
+  <caption>Table &quot;public.activeships&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">id</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">ID from the TBG mailer page</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t2">TABLE adventures</a></h3>
+<p>Every time an adventure is seen, either from the location report if you're in system or from the "Known Adventures", it is entered into this table. The donation flags indicate who is allowed to view the adventure. As the player pages are processed, the permisions will become more lenient (e.g. when a player who donates all adventures reports the adventure, all the flags get set to true).<p>
+
+<table border="1">
+  <caption>Table &quot;public.adventures&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">advid</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.adventures_advid_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">area</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Engineering, Science, Medical, Weaponry</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">level</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">name</td>
+    <td align="left">varchar(48)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">E.g. Moon Adventure 2</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sensors</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">May be blank if unknown</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_newbie</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_done</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_high</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_hard</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_all</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">locid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">pub_adv_newbie</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t3">TABLE aliens</a></h3>
+<p>Stores static info about alien races. Ships are created with skilllevel modules plus or minus 1 min 1 max 6.<p>
+
+<table border="1">
+  <caption>Table &quot;public.aliens&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">race</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">E.g. Ant, Spider</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">alignment</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Chaotic, Friendly, Hostile, Neutral</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Homeworld</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">area</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Engineering, Medical, Science, Weaponry</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">skilllevel</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t4">TABLE allships</a></h3>
+<p>For every ship that's ever been seen in DOW on or before the given turn, list the ships status (one of Alien, Player, Retired). It is much faster to store this info once than to generate it each time.<p>
+
+<table border="1">
+  <caption>Table &quot;public.allships&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">type</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">One of Alien, Player, Retired</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t5">TABLE artifacts</a></h3>
+<p>Artifacts carried by donors. I should have used ship name instead of donorid. Curses are stored in TABLE curses, with a reference to the artifactid. Keys are stored in TABLE keys, with a reference to the artifactid.<p>
+
+<table border="1">
+  <caption>Table &quot;public.artifacts&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">artifactid</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.artifacts_artifactid_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">name</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">e.g. Blocabaga</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">bless</td>
+    <td align="left">character(2)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">One of Cl, Id, Ls, Sb, Sh, Sn, Wd, Wp</td>
+  </tr>
+</table>
+<p>Indexes:<br />
+    &quot;artifact_index1&quot; btree (artifactid)<br />
+    &quot;artifact_index2&quot; btree (turn)<br />
+</p>
+
+<hr>
+<h3><a name="t6">TABLE badland</a></h3>
+<p>Stores the danger level for each badland. Not currently used by anything.<p>
+
+<table border="1">
+  <caption>Table &quot;public.badland&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">id</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.badland_id_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">danger</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t7">TABLE banned</a></h3>
+<p>Which ships are banned from dow, when they were banned, etc.<p>
+
+<table border="1">
+  <caption>Table &quot;public.banned&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">action</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">One Banned or Permaban (there is no longer any distinction between the two).</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">description</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t8">TABLE colonies</a></h3>
+<p>Stores info about each colony.<p>
+
+<table border="1">
+  <caption>Table &quot;public.colonies&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">id</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Unique id for each colony</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">race</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">e.g. Cat, Goblin</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">resource</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">e.g. Old Songs, Mittens</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t9">TABLE corona</a></h3>
+<p>Stores the danger level of each Stellar Corona. Not currently used by anything.<p>
+
+<table border="1">
+  <caption>Table &quot;public.corona&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">id</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.corona_id_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">danger</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t10">TABLE criminals</a></h3>
+<p>Records where criminals have been seen. Note that just because you know a criminal is in a location, you cannot necessarily pick him up. I believe you personally need to have been the one to gain the information about his location.<p>
+
+<table border="1">
+  <caption>Table &quot;public.criminals&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">who</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">level</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">location</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">e.g. homeworld, moon, colony</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t11">TABLE curses</a></h3>
+<p>Stores the curses on all artifacts. The artifactid is a reference to an entry in TABLE artifacts.<p>
+
+<table border="1">
+  <caption>Table &quot;public.curses&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">artifactid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Reference to entry in TABLE artifacts.</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">curse</td>
+    <td align="left">character(2)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">One of Cl, Id, Ls, Sb, Sh, Sn, Wd, Wp</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t12">TABLE customsetprefs</a></h3>
+<p>Settings for the Custom Set. Values should have been floats instead of ints.<p>
+
+<table border="1">
+  <caption>Table &quot;public.customsetprefs&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Starnet</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">usn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Unaccessed starnet</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">hw</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Homeworld</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">hwup</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Homeworld with uncured plague</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">hwne</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Homeworld of non-enemy alien</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">factory</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">cfactory</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Contraband factory</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">erogue</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Engineering rogue band</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">srogue</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Science rogue band</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">mrogue</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Medical rogue band</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">wrogue</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Weaponry rogue band</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">jumpcost</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">resources</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">hiringhall</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">eacad</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Engineering academy</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sacad</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Science academy</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">macad</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Medical academy</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">wacad</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Weaponry academy</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">eadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Engineering adventure</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Science adventure</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">madv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Medical adventure</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">wadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Weaponry adventure</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">euadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Uncomplete engineering adventure</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">suadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Uncomplete science adventure</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">muadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Uncomplete medical adventure</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">wuadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Uncomplete weaponry adventure</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">eschool</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Engineering school</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sschool</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Science school</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">mschool</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Medical school</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">wschool</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Weaponry school</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">prison</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ood</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Out of date in DOW</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">hwh</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Homeworld of hostile alien</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">hwc</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Homeworld of chaotic alien</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ocean</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">epadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Engineering preferred adventure</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">spadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Science preferred adventure</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">mpadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Medical preferred adventure</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">wpadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Weaponry preferred adventure</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">useorders</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+<hr>
+<h3><a name="t14">TABLE donors</a></h3>
+<p>Information about members of DOW are stored here. Each member has a unique donorid.
+
+The dow_pw is stored plain text. It is also stored encripted in the .htaccess file. See the script dowpw.pl for how the passwords are maintained.
+
+If adv_all is set, so should adv_*
+
+If admin is set, then most scripts will allow you to add the argument -u+ShipName and look at the script as that ship. Very useful for debugging.<p>
+
+<table border="1">
+  <caption>Table &quot;public.donors&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.donors_donorid_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">label</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">captain</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">email</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">secreturl</td>
+    <td align="left">varchar(128)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Turn page on the tbg server.</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">dow_pw</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Password in DOW</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_newbie</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Share adventures of level 1-5</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_done</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Share adventures that the donor has already completed</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_high</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Share adventures that are too high level for the donor to do</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_hard</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Share adventures of level 25+</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_all</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Share all adventures regardless of other settings</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">shiploc</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">shipconfig</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">influence</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">admin</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Administrator. Used for debugging.</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">xeno</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Member of the Institute of Xenology</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">wise</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ninjafriend</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">pub_adv_newbie</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">xenoadmin</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">obfuscate</td>
+    <td align="left">boolean</td>
+    <td align="left">default true</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">purgers</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">anonymous</td>
+    <td align="left">boolean</td>
+    <td align="left">default true</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">pub_shop_newbie</td>
+    <td align="left">boolean</td>
+    <td align="left">default true</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">pub_trade</td>
+    <td align="left">boolean</td>
+    <td align="left">default true</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t15">TABLE dowaccess</a></h3>
+<p>Stores every access to a DOW page that contains a remote_user. This table is huge. Good for detecting spies.<p>
+
+<table border="1">
+  <caption>Table &quot;public.dowaccess&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">http_user_agent</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">remote_user</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">remote_addr</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">request_uri</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">http_referer</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">dts</td>
+    <td align="left">timestamp without time zone</td>
+    <td align="left">default now()</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+<p>Indexes:<br />
+    &quot;dowaccess_index2&quot; btree (turn)<br />
+    &quot;dowaccessindex1&quot; btree (dts)<br />
+</p>
+
+<hr>
+<h3><a name="t17">TABLE enemies</a></h3>
+<p>Records the alien races that a donor is enemies with.<p>
+
+<table border="1">
+  <caption>Table &quot;public.enemies&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">who</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">e.g. Ant, Bird. Should have been &apos;race&apos;.</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t18">TABLE factories</a></h3>
+<p>Static info on which systems product what resources.<p>
+
+<table border="1">
+  <caption>Table &quot;public.factories&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">resource</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">cost</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t19">TABLE favour</a></h3>
+<p>Amount of favour of DOW members<p>
+
+<table border="1">
+  <caption>Table &quot;public.favour&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">area</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Engineering, Medical, Science, Weaponry</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">favour</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+<p>Indexes:<br />
+    &quot;favourindex1&quot; btree (turn)<br />
+</p>
+
+<hr>
+<h3><a name="t20">TABLE flags</a></h3>
+<p>The flag for every non-alien ship<p>
+
+<table border="1">
+  <caption>Table &quot;public.flags&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">flag</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Raw html extracted directly from turn page.</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+<hr>
+<h3><a name="t24">TABLE fragments</a></h3>
+<p>Stores Starnet password fragments. The source is DOW if obtained from a donor's turn pages. Other sources are entered by hand, and are typically GIN or TC (for terminal codes). The source is not used by anything currently.<p>
+
+<table border="1">
+  <caption>Table &quot;public.fragments&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">fragment</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">source</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Not currently used.</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t25">TABLE frozen</a></h3>
+<p>Lists DOW members who are currently not allowed to access the DOW pages. This includes people who quit the game or quit DOW.<p>
+
+<table border="1">
+  <caption>Table &quot;public.frozen&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t26">TABLE influence</a></h3>
+<p>Stores influence information for presidential elections.<p>
+
+<table border="1">
+  <caption>Table &quot;public.influence&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">race</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">e.g. Wasp, Otter</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">location</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Location ID. Not currently used.</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">votes</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">influence</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">donated</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+<p>Indexes:<br />
+    &quot;influenceindex1&quot; btree (ship)<br />
+</p>
+
+<hr>
+<h3><a name="t27">TABLE keys</a></h3>
+<p>Stores the keys on all artifacts. The artifactid is a reference to an entry in TABLE artifacts.<p>
+
+<table border="1">
+  <caption>Table &quot;public.keys&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">artifactid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Reference to entry in TABLE artifacts</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">key</td>
+    <td align="left">character(1)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">One of 0, 1, 2, 3, 4, 5, 6, 7</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t28">TABLE medicine</a></h3>
+<p>What medicine is a given ship carrying? Where can it be sold? What's it value?<p>
+
+<table border="1">
+  <caption>Table &quot;public.medicine&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">value</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t29">TABLE meetings</a></h3>
+<p>Stores ship pairing data. "ship1 (protecting protected1) meets ship2 (protecting protected2)".
+Any ship field except ship1 may be null (e.g. if a ship is alone in a system).<p>
+
+<table border="1">
+  <caption>Table &quot;public.meetings&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship1</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship2</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">donated</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">protected1</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">protected2</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">purgers</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t30">TABLE modules</a></h3>
+<p>Modules carried by donors. I should have used ship name instead of donorid. See TABLE shop for meaning of type and tech. See also TABLE nmods, a replacement for this table used by newer scripts.<p>
+
+<table border="1">
+  <caption>Table &quot;public.modules&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">moduleid</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.modules_moduleid_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">item</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">e.g. warp drive-222 (U)</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">type</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">1-warp  2-impulse  3-sensor  4-cloak  5-life support  6-sickbay  7-shield  8-ram  9-gun  10-disruptor  11-laser  12-missile  13-drone  14-figher</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">tech</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">yield</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Modules used to provide energy; now they cost energy. This field is used for both.</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">reliability</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+<p>Indexes:<br />
+    &quot;module_index1&quot; btree (turn)<br />
+    &quot;module_index2&quot; btree (ship)<br />
+</p>
+
+<hr>
+<h3><a name="t31">TABLE newsettings</a></h3>
+<p>Used to store user requested changes to their settings. Rows from this table are copied to TABLE donors when the turn turns.<p>
+
+<table border="1">
+  <caption>Table &quot;public.newsettings&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">email</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">secreturl</td>
+    <td align="left">varchar(128)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">dow_pw</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_newbie</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_done</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_high</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_hard</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">adv_all</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">shiploc</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">shipconfig</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">influence</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">pub_adv_newbie</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">obfuscate</td>
+    <td align="left">boolean</td>
+    <td align="left">default true</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">purgers</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">anonymous</td>
+    <td align="left">boolean</td>
+    <td align="left">default true</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">pub_shop_newbie</td>
+    <td align="left">boolean</td>
+    <td align="left">default true</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">pub_trade</td>
+    <td align="left">boolean</td>
+    <td align="left">default true</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t32">TABLE nmods</a></h3>
+<p>New table for modules. Currently only includes modules on ships, though it was designed for ships and shops. Updated by do_ships.pl, while TABLE modules is updated by updatedow.pl.<p>
+
+<table border="1">
+  <caption>Table &quot;public.nmods&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">moduleid</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.nmods_moduleid_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">not null</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">loctype</td>
+    <td align="left">character(4)</td>
+    <td align="left">not null</td>
+    <td align="left">One of ship or shop.</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">loc</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">not null</td>
+    <td align="left">Either the ship name or the shope name</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">name</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">not null</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">broken</td>
+    <td align="left">boolean</td>
+    <td align="left">not null default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">type</td>
+    <td align="left">integer</td>
+    <td align="left">not null</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">tech</td>
+    <td align="left">integer</td>
+    <td align="left">not null</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">yield</td>
+    <td align="left">integer</td>
+    <td align="left">not null</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">reliability</td>
+    <td align="left">integer</td>
+    <td align="left">not null</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">price</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+<p>Indexes:<br />
+    &quot;nmods_index1&quot; btree (turn)<br />
+    &quot;nmods_index2&quot; btree (loc)<br />
+</p>
+
+<hr>
+<h3><a name="t36">TABLE plagues</a></h3>
+<p>Records which plagues a donor has cured.<p>
+
+<table border="1">
+  <caption>Table &quot;public.plagues&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t37">TABLE pods</a></h3>
+<p>Stores which pods a donor carries. For non-donors, the donorid is null and the ship is set. I really should not have used donorids...<p>
+
+<table border="1">
+  <caption>Table &quot;public.pods&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">NULL if not a donor</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">name</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">e.g. pod-835</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">capacity</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Size (tech level)</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">n</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">How much cargo currently carried</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">resource</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Tea, Boardgames, etc</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">NULL if a donor. Sigh.</td>
+  </tr>
+</table>
+<p>Indexes:<br />
+    &quot;pods_index1&quot; btree (turn)<br />
+</p>
+
+<hr>
+<h3><a name="t38">TABLE pollitems</a></h3>
+<p>Stores the possible things to vote on in a poll. The pollid is a reference to an entry in TABLE polls. See also TABLE pollvotes for who voted for what.<p>
+
+<table border="1">
+  <caption>Table &quot;public.pollitems&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">pollitemid</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.pollitems_pollitemid_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">pollid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Reference to entry in TABLE polls</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">item</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">e.g. Yes, Abstain, Forgive</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t39">TABLE polls</a></h3>
+<p>Stores poll information. See also TABLE pollitems for what you can vote on in a poll and TABLE pollvotes for who voted for what.<p>
+
+<table border="1">
+  <caption>Table &quot;public.polls&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">pollid</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.polls_pollid_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">title</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">open</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">True if you can still vote in this poll. I set this manually.</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">closedate</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">When the poll will close. Only used for display -- I set polls.open manually.</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">note</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t40">TABLE pollvotes</a></h3>
+<p>Stores what donors voted for in a poll.<p>
+
+<table border="1">
+  <caption>Table &quot;public.pollvotes&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">pollitemid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Reference to entry in TABLE pollitems</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">pollid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Reference to entry in TABLE polls</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t41">TABLE popcorn</a></h3>
+<p>Records popcorn sightings.<p>
+
+<table border="1">
+  <caption>Table &quot;public.popcorn&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">impulse</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sensor</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">shield</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t42">TABLE powerrank</a></h3>
+<p>Records power rank for all ships. Generated by do_ships.pl<p>
+
+<table border="1">
+  <caption>Table &quot;public.powerrank&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">powerrank</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t43">TABLE prefs</a></h3>
+<p>General DOW preferences. This grew organically, and should be cleaned up.<p>
+
+<table border="1">
+  <caption>Table &quot;public.prefs&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">advdone</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Show already completed adventures in adventure views</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">advhard</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Show adventures that are too hard in adventure views</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">advsort</td>
+    <td align="left">varchar(10)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Sort order for adventure list view</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">bottombar</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Arbitrary html code added to bottom of each of the donors pages</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">mapinsys</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Show map in system view</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">leftbar</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">No longer used</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">showleftbar</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Show the left navigation bar</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">leftbarwidth</td>
+    <td align="left">integer</td>
+    <td align="left">default 150</td>
+    <td align="left">Width of left nav bar</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">prefadvmin</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Preferred adventure level min</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">prefadvmax</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Preferred adventure level max</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">onlyprefadv</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Show only preferred adventures in adventure list/map view</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t47">TABLE probes</a></h3>
+<p>Stores where donors have probes deployed. I should have included the turn! Instead, I delete the table every turn and reset with latest values.<p>
+
+<table border="1">
+  <caption>Table &quot;public.probes&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t48">TABLE purgedsystems</a></h3>
+<p>Records which system had its Starnet purged<p>
+
+<table border="1">
+  <caption>Table &quot;public.purgedsystems&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">purgeid</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.purgedsystems_purgeid_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">purgers</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">True if the donor who observed the purge is donating purge information</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t49">TABLE purgesuspects</a></h3>
+<p>Records who was at a system when its Starnet was purged.<p>
+
+<table border="1">
+  <caption>Table &quot;public.purgesuspects&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">purgeid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Reference to TABLE purgedsystems, which identifies which system and turn the purge took place</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Either a ship name, or &apos;Dybuk Logic Bomb&apos; if the SST so reported</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">purgers</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">True if the donor who observed the purge is donating purge information</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t50">TABLE rfat</a></h3>
+<p>Used to coordinate the science spell 'Report from All Terminals'. See rfat.pl for how it's used.<p>
+
+<table border="1">
+  <caption>Table &quot;public.rfat&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Each DOW ship appears at most once in this table</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">contact</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Should the ship be contacted for rfat requests?</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Last time the ship was request to do an rfat. Note that the scripts do not check if they actually did it or not.</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t51">TABLE rings</a></h3>
+<p>Reports on good and evil ring sightings<p>
+
+<table border="1">
+  <caption>Table &quot;public.rings&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">type</td>
+    <td align="left">varchar(4)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Good or Evil</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">area</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Engineering, Medical, Science, Weaponry</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t52">TABLE rogues</a></h3>
+<p>Stores location of rogue bands and associated information.  Note that the location is represented by what is needed to protect you from the danger of the location.<p>
+
+<table border="1">
+  <caption>Table &quot;public.rogues&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">race</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">e.g. Worm, Elf</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">field</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Engineering, Science, Medical, Weaponry</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">location</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Impulse or Life Support</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">danger</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Percentage required</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t53">TABLE rss</a></h3>
+<p>Route simulator settings. Similar to TABLE customsetprefs. See also comments there.<p>
+
+<table border="1">
+  <caption>Table &quot;public.rss&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">contraband</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">olympian</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">maxjump</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">nturns</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">cargoweight</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">usn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">hw</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">hwup</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">hwne</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">hwh</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">hwc</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">factory</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">cfactory</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">erogue</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">srogue</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">mrogue</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">wrogue</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">hiringhall</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">eacad</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sacad</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">macad</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">wacad</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">eadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">madv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">wadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">euadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">suadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">muadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">wuadv</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">eschool</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sschool</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">mschool</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">wschool</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">prison</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ood</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system_bonuses</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Arbitrary system bonuses is the form system bonus, system bonus...</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">updated</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Does the route simulator need to be run?</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ocean</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">excludepods</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Which pods should be excluded?</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">maxpurchase</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">energypercent</td>
+    <td align="left">double precision</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t54">TABLE shipcomments</a></h3>
+<p>Stores comments from DOW members about other ships.<p>
+
+<table border="1">
+  <caption>Table &quot;public.shipcomments&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">commentid</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.shipcomments_commentid_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Donorid of the person leaving the comment. May be NULL for ships that quit DOW before I starting recording who had quit DOW.</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Which ship the comment is about.</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">score</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">comment</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">dts</td>
+    <td align="left">timestamp without time zone</td>
+    <td align="left">default now()</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t55">TABLE shipconfig</a></h3>
+<p>Stores the path to where the ship configuration HTML page is stored. Poor choice of name for the table.<p>
+
+<table border="1">
+  <caption>Table &quot;public.shipconfig&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">path</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">donated</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">purgers</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+<p>Indexes:<br />
+    &quot;shipconfigindex1&quot; btree (ship)<br />
+    &quot;shipconfigindex2&quot; btree (turn)<br />
+</p>
+
+<hr>
+<h3><a name="t56">TABLE shipdata</a></h3>
+<p>Grab bag of data about donor's ships. Entries have been added as needed rather than designed.<p>
+
+<table border="1">
+  <caption>Table &quot;public.shipdata&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">shipdataid</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.shipdata_shipdataid_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">engskill</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sciskill</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">medskill</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">weapskill</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">nengcrew</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">nscicrew</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">nmedcrew</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">nweapcrew</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">engcrewskill</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">scicrewskill</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">medcrewskill</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">weapcrewskill</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">impulsepercent</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">lifesupportpercent</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">warppercent</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sensorpercent</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">cloakpercent</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sickbaypercent</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">shieldpercent</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">weaponpercent</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+<p>Indexes:<br />
+    &quot;shipdata_index1&quot; btree (turn)<br />
+</p>
+
+<hr>
+<h3><a name="t57">TABLE shiploc</a></h3>
+<p>Stores the locations of ships, including from the turn pages, terminal reports, and trace reports (which is why TABLE meetings is not sufficient, since it only gives the location of the ship, not who it is paired with).<p>
+
+<table border="1">
+  <caption>Table &quot;public.shiploc&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">donated</td>
+    <td align="left">boolean</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">purgers</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+<p>Indexes:<br />
+    &quot;shiplocindex1&quot; unique, btree (system, turn, ship)<br />
+    &quot;shiplocindex2&quot; btree (ship)<br />
+</p>
+
+<hr>
+<h3><a name="t58">TABLE shop</a></h3>
+<p>Stores shop data. I should have used a unique ID for each shop. Note that I intended to combine this table into TABLE nmods, but I haven't yet. 
+
+Types:
+Warp 1, impulse 2, sensor 3, cloak 4, life support 5, sickbay 6,
+shield 7, ram 8, gun 9, disruptor 10, laser 11, missile 12, drone 13,
+fighter 14, pod 15.
+
+Techs:
+Primitive 1, Basic 2, Mediocre 3, Advanced 4, Exotic 5, Magic 6.<p>
+
+<table border="1">
+  <caption>Table &quot;public.shop&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">shopid</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.shop_shopid_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">item</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">type</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">tech</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">yield</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">reliability</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">price</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">sharenewbie</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+<p>Indexes:<br />
+    &quot;shop_index_1&quot; btree (turn)<br />
+    &quot;shop_index_2&quot; btree (tech, &quot;type&quot;)<br />
+    &quot;shop_index_3&quot; btree (system)<br />
+</p>
+
+<hr>
+<h3><a name="t59">TABLE skills</a></h3>
+<p>Stores the skill levels of each DOW member. IMPORTANT: Only when a new skill is learned does an entry appear. Each area/name combination should therefore only occur once. BUG: Does not take into account evil ring use!<p>
+
+<table border="1">
+  <caption>Table &quot;public.skills&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">area</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Engineering, Science, Medical, Weaponry</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">name</td>
+    <td align="left">varchar(48)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">e.g. Moon Adventure 1, Repaired sensor, etc.</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t60">TABLE starcoords</a></h3>
+<p>Positions of the stars. Note that it is rotated by 90 degrees with respect to how they're displayed. I wish I could remember where I found these values...<p>
+
+<table border="1">
+  <caption>Table &quot;public.starcoords&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">x</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">y</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">destnum</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t61">TABLE stargates</a></h3>
+<p>Stores stargate information. Note that both directions are stored in the table (e.g. Alnitak/Zosca/1 and Zosca/Alnitak/1).<p>
+
+<table border="1">
+  <caption>Table &quot;public.stargates&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">system1</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system2</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">key</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t62">TABLE statics</a></h3>
+<p>Various static data. Currently one of: Engineering Academy, Engineering School, Hiring Hall, Medical Academy, Medical School, Ocean, Prison, Science Academy, Science School, Weaponry Academy, Weaponry School.<p>
+
+<table border="1">
+  <caption>Table &quot;public.statics&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">item</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t63">TABLE sysplagues</a></h3>
+<p>Reported level of plagues from donors turn pages.<p>
+
+<table border="1">
+  <caption>Table &quot;public.sysplagues&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">level</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t64">TABLE sysstarnet</a></h3>
+<p>Static list of systems with Starnet terminals.<p>
+
+<table border="1">
+  <caption>Table &quot;public.sysstarnet&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">terminal</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t65">TABLE systemviewed</a></h3>
+<p>Stores whether the ship pairings in a given system have been reported on a given turn. An entry exists if there's a turn report, probe report, trace report, or terminal report for the system.<p>
+
+<table border="1">
+  <caption>Table &quot;public.systemviewed&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+<hr>
+<h3><a name="t68">TABLE terminals</a></h3>
+<p>Records which terminals a donor has accessed.<p>
+
+<table border="1">
+  <caption>Table &quot;public.terminals&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t69">TABLE terrain</a></h3>
+<p>Stores the terrain type of each system. One of Asteroids, Clear, Dyson Sphere, Nebula<p>
+
+<table border="1">
+  <caption>Table &quot;public.terrain&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">terrain</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t70">TABLE traces</a></h3>
+<p>Stores which ship (if any) a DOW member is tracing.<p>
+
+<table border="1">
+  <caption>Table &quot;public.traces&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t71">TABLE tracking</a></h3>
+<p>Stores which ships a DOW member is tracking.<p>
+
+<table border="1">
+  <caption>Table &quot;public.tracking&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">DOW member</td>
+  </tr>
+  <tr valign="top">
+    <td align="left">tracked</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">Name of ship being tracked.</td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t72">TABLE trade</a></h3>
+<p>Records trade data from player pages, terminal reports, probe reports, and the Presidential database.
+
+IMPORTANT: Since some systems have colonies that buy two of the same
+goods, it is possible to have identical entries (except for the
+tradeid). I should have assigned each colony a unique ID, and used
+that instead of system/resource.
+
+NOTE: The donorid represents who donated the data. It is no longer
+used for anything. It is the donorid if it came from the turn report,
+-1 for the presidential database, or donorid+1000 for terminal
+reports, etc.
+
+NOTE: I added locid about half-way through DOW's life.<p>
+
+<table border="1">
+  <caption>Table &quot;public.trade&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">tradeid</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.trade_tradeid_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">system</td>
+    <td align="left">varchar(16)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">resource</td>
+    <td align="left">varchar(32)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">price</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">locid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">pub_shared</td>
+    <td align="left">boolean</td>
+    <td align="left">default false</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+<p>Indexes:<br />
+    &quot;trade_index_1&quot; btree (turn)<br />
+    &quot;trade_index_2&quot; btree (system)<br />
+</p>
+
+<hr>
+<h3><a name="t74">TABLE turnupdate</a></h3>
+<p>Records which turn each donor has contributed. A common idiom to get the current turn is: select max(turn) from turnupdate;<p>
+
+<table border="1">
+  <caption>Table &quot;public.turnupdate&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">donorid</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+<hr>
+<h3><a name="t75">TABLE xeno_history</a></h3>
+<p>For each Xeno service, store who/what/when. Note that for the scripts to work, there should always be at least one entry for each Xenologist (e.g. "Joined Xenos").<p>
+
+<table border="1">
+  <caption>Table &quot;public.xeno_history&quot;</caption>
+  <tr>
+    <th align="center">Column</th>
+    <th align="center">Type</th>
+    <th align="center">Modifiers</th>
+    <th align="center">Description</th>
+  </tr>
+  <tr valign="top">
+    <td align="left">id</td>
+    <td align="left">integer</td>
+    <td align="left">not null default nextval(&apos;public.xeno_history_id_seq&apos;::text)</td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">ship</td>
+    <td align="left">varchar(64)</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">turn</td>
+    <td align="left">integer</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+  <tr valign="top">
+    <td align="left">action</td>
+    <td align="left">text</td>
+    <td align="left">&nbsp; </td>
+    <td align="left">&nbsp; </td>
+  </tr>
+</table>
+
+
+</body></html>

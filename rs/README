@@ -1,0 +1,169 @@
+
+06/18/08: I've removed a bunch of the external dependencies for the
+route simulator. It still requires perl, gcc, postgresql, and Boehm's
+garbage collection library. I've done some ad-hoc updates to account
+for the new jump rules, but I haven't retuned the algorithm for it.
+Specifically, I haven't checked whether the SList data structure still
+makes sense given that the costs for jumps now varies so widely.
+
+
+Original Notes on the Route Simulator
+
+The route simulator obtains current price information from DOW, and,
+given a ship configuration, computes all possible combinations of
+sells, buys, and jumps up to 6 or 7 turns into the future. It returns
+the most profitable routes.
+
+The simulator takes into account current trade prices, your ship's
+warp factor, mass, Engineering skill, available pod space, keys, and
+how much you're willing to spend on trade goods.
+
+In addition to trade, the route simulator can also assign a value to
+systems based on presence of adventures, unaccessed starnet terminals,
+uncured plagues, homeworlds, etc, etc, etc.
+
+It actually works best on ships that have constraints - if you have
+plenty of empty pod space, enough money to buy anything, and enough
+warp to jump anywhere, you might as well pick the most lucrative
+single-hop trade route, and just follow it. But if you're small, slow,
+and/or poor, it can find very lucrative routes (e.g. jump to sys1,
+sell res1 to make space in pod, buy res2, jump to sys2, sell res1 and
+res2, etc...).
+
+Details
+
+The simulator takes a few parameters. First, how many turns in the
+future to look? I find that more than 6 is seldom useful, and takes
+too much memory. However, only looking 1 or 2 doesn't find good
+multi-hop routes. 5 or 6 is what I typically use.
+
+Next, it needs a weighting factor to assign a value to cargo you're
+carrying. A value of 1.0 means the value of a cargo is exactly the
+cost to buy the cargo. A value of 2.0 is exactly twice the cost. The
+weighting factor can be adjusted for each turn forward the simulator
+looks (e.g. start at 2.0, then decay down to 1.0). I typically just
+set it to 1.0 (which favors selling off cargo).
+
+It can be configured to include or exclude trade in contraband. It can
+be set to include or exclude Olympus as a place to sell cargo.
+
+Since you almost certainly do not want to plan routes that spend every
+erg of energy, you can specify both how much total you're willing to
+invest, and the maximum total you're willing to spend on one jump.
+
+One limitation of the program is that the current economic model is
+quite primitive. The sell price of a good on the first turn is set to
+the most recently known price. Each turn into the future, the sell
+price is smoothed towards the long-term average of the sell price
+at the destination. The simulator does not take into account who's
+carrying what.
+
+The simulator is not in a state that is easy to share. Not only is it
+an unholy combination of perl, python, C, C++, and local libraries,
+but it also requires a fairly large amount of memory to run (hundreds
+of MB). 
+
+For those of you who are interested, here's a bit on how the program
+works.
+
+The program implicitly builds a tree where the root is your current
+ship configuration (number and capacity of pods, what they're
+carrying, amount of money, etc). It then expands the root by computing
+every possible combination of "sells". So for each cargo you are
+carrying that a colony buys, it will compute a new node for selling 0
+or selling 1 such cargo. For example, if you're carrying a Snowman and
+a Quad Tree, and there are colonies that buy both, it will generate
+4 descendants: Sell 0 Snowmen and 0 Quad Trees, sell 1 Snowmen and 0
+Quad Trees, sell 0 Snowmen and 1 Quad Trees, sell 1 Snowmen and 1 Quad
+Trees.
+
+You now have 4 new nodes, each with a different configuration. You
+expand each and every new node with whatever you can buy. You can buy
+if there's a factory, if you have pod space, and if you have money. So
+if you can buy up to 3 on a unit, each node gets expanded by "Buy 0",
+"Buy 1", "Buy 2" and "Buy 3". You now have a total of 16 nodes.
+
+For each of those nodes, expand by where you can jump. This is limited
+only by available energy and a setting for the maximum allowable
+amount of energy to spend on a single jump. For our example, let's
+assume 25 systems. You now have 400 nodes, and have looked out one
+turn.
+
+Now expand each of those nodes by all possible "sells" at the node's
+new location. Then "buys". Then "jumps". Etc.
+
+If you were to represent all possible branches in the tree explicitly,
+you would have on the order of 400^N nodes after N turns. That's in
+the petabytes for 6 turns into the future! Obviously, the algorithm
+does some aggressive pruning to reduce memory and time requirements.
+
+The pruning is essentially a bounded adaptive beam search. The
+algorithm tracks which is the best hypothesis so far, and, if it needs
+more memory to store new hypotheses, it will dump old hypotheses that
+are far from the current "best" hypothesis.
+
+The code that actually runs the simulator is a mere 1200 lines of very
+tight C plus some libraries. There's lots of data structure munging to
+get to that point though.
+
+All static information (such as star locations, prices, and ship
+configuration) is passed through some munging, and written as C
+data structures to a .c file. I then recompile each time I run the
+simulator. This saves a few bytes in the hypothesis data structure,
+which ends up allowing a lot more hypotheses to be considered. It also
+improves running time slightly, since the optimizer knows more about
+the code (e.g. loop unrolling).
+
+My day job is speech recognition research, and it turns out that this
+sort of pruned search is pretty similar to the "decoder" in a speech
+recognizer, so I used a lot of existing code. "When all you have is
+a hammer, everything looks like a breadth-first adaptive beam search
+through a massive tree structure..."
+
+
+More Details.
+
+
+Data Sources
+
+The program uses a horrible mixture of DOW, static data structures,
+and the turn pages themselves. This is just a result of history -- I
+wrote the simulator long before DOW was fully implemented, so the data
+I needed wasn't in the database.
+
+
+How to Run the Simulator
+
+The script runit.pl is called by cron to run the route simulator.
+
+runit.pl calls genplayer.pl to generates the file shipdata.c, which
+contains data specific to the ship being processed. The file rs.c does
+a #include "shipdata.c", and is then compiled by runit.pl. For each
+ship, the route simulator is recompiled and run.
+
+The file tbgstatic.c contains data structures relating to the static
+data in tbg. For example, the coordinates of systems, the cost of
+resources, and where colonies are located. Parts of it were originally
+generated by makestatic.pl, but you shouldn't need to fiddle with it
+unless the rules change.
+
+All these gyrations allow the compiler to save little space in the
+hypothesis data structure, and also provide a few extra opportunities
+for optimization (06/18/08: This used to be significant, but it may
+not be anymore. I haven't tested alternate methods in quite a while).
+
+
+Programming Notes
+
+I use Boehm's conservative garbage collection library for C, since the
+data structures can get hairy. Google will tell you where the latest
+version is. For my linux box, I needed to link with -ldl for it to
+work.
+
+The hypotheses are stored in a data structure I call an SList. It is
+a dictionary of small integers (a score) to void* (a hypothesis). It
+assumes that the range of scores in the hypotheses is not too large.
+If the range is very large, the data structure becomes inefficient.
+I experimented with a tree, but SList was faster and more compact
+(06/18/08: This may no longer be true).
+

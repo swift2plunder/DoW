@@ -1,0 +1,32 @@
+#define EMPTY_MASS	(101)
+#define WARP_TECH	(52)
+#define ENG_SKILL	(55)
+#define INITIAL_ENERGY	(2063)
+#define INITIAL_LOC	("Merak")
+
+#define NPODS		(7)
+
+#define POD_CAPACITY	6, 4, 3, 3, 3, 3, 2
+#define INITIAL_LOAD	0, "", 3, "Sharp Sticks (!)", 1, "Boardgames", 1, "Mittens", 1, "Jumpers", 1, "Emperors' New Clothes", 1, "Ninja Beer"
+
+#define HASKEY(x) (x == 0 || x == 1 || x == 2 || x == 3 || x == 4 || x == 5 || x == 6 || x == 7)
+
+#define MAX_JUMP_COST (5000)
+#define MAX_PURCHASE (-1)
+#define OLYMPIAN (1)
+#define CONTRABAND (1)
+#define DEFAULT_NTURNS (3)
+#define DEFAULT_CARGO_WEIGHT "1.1"
+
+int SystemScore[NSTARS] = {
+  0, 10, 560, 650, 0, 500, 100, 510, 0, 710, 100, 0, 500, 10,
+  560, 50, 0, 50, 600, 210, 100, 0, 0, 660, 0, 660, 510, 100,
+  100, 560, 0, 660, 100, 600, 100, 50, 100, 710, 550, 600,
+  100, 500, 600, 100, 100, 210, 110, 610, 0, 10, 100, 100, 0,
+  0, 650, 0, 100, 600, 100, 100, 100, 100, 60, 110, 0, 600,
+  510, 110, 100, 100, 160, 100, 500, 0, 0, 100, 0, 100, 0,
+  50, 660, 200, 100, 550, 50, 0, 60, 650, 100, 150, 150, 560,
+  0, 710, 0, 110, 0, 100, 110, 100, 110, 610, 100, 1100, 610,
+  510, 0, 10, 650, 0, 550, 50, 100, 100, 150, 100, 0, 10,
+  100, 100, 110, 160, 510, 600, 0, 3700, 0, 0, 560
+};

@@ -1,0 +1,20 @@
+I wrote DOW as a hobby and an excuse to learn about database, and the
+code reflects this. I made lots of mistakes with both the schema and
+the code, which I never corrected. Everything grew organically, with
+no refactoring. As a result, the code is pretty hideous.
+
+I would suggest taking a look at MISTAKES, which lists some of the
+most obvious problems with the schema and code. The time to correct
+the schema errors is before you start adding data!
+
+In order to maintain DOW anonymity, I removed a bunch of code that
+obfuscates who's a member. I also replaced a bunch of hard-coded paths
+with "/Path/to/".
+
+The file MANIFEST lists all the files and directories at the top
+level, with a short explanation of what each file is for.
+
+
+I've also included the dow2 directory, which contains an abandoned
+effort at a new version of DOW. It corrects some of the mistakes, but
+has some issues with efficiency.

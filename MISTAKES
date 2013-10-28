@@ -1,0 +1,51 @@
+Meta-comment: I tried to save space, and that was a mistake. Disk is
+cheap, and the data is textual.
+
+
+Each colony should have a unique ID. Trade data should be tied to that
+ID. (I sort-of added this later).
+
+Ship data should be indexed by ship name, not by donorid. That way, if
+the information becomes available for non-members, it can easily be
+added. Donorid was just a bad idea.
+
+Each piece of information should have a unique ID. Then, another set
+of tables could track who has access to that information.
+
+Each module/pod/artifact should be entered in one table, which
+includes a "location" column. The location could be e.g. "Alcor
+Shop-23", "Mad Ninja", "Cat 35", etc. (I added this as tables nmods,
+powerrank, etc).
+
+Form handling needs to be made more uniform (e.g. the stuff in
+jforums). Most form stuff should probably be consolidated into a
+single script that is self-submitting. This typically eases error
+checking.
+
+CSS should be used instead of all the nested tables. (Maybe. Depends
+on browser compliance). (This used to be much more of an issue than it
+is now.)
+
+Various tables only contain the CURRENT information, rather than a
+full history indexed by turn. This includes skills and probes. Big
+mistake.
+
+The concept of "setting" (e.g. share adventures with public?) evolved
+over time, and should be unified.
+
+The way turns are cached and later accessed is pretty ugly.
+
+Blank values should be NULL in the database, instead of a string with
+0 length.
+
+Sharing options for the presidential report, terminal report, probe
+reports, etc. should be separate from the donor's sharing options.
+
+Attaching donorid to trade table makes no sense.
+
+Paths are hardwired everywhere. Should probably be in DB or at least
+in dow.pm
+
+Insertion to the database was positional, making schema migration hard
+(e.g. "insert into table value(?, ?)" instead of "insert into table
+(col1, col2) values (?, ?)").

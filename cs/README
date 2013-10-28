@@ -1,0 +1,20 @@
+TBG Combat Simulator
+
+I did not write this code. The person who wrote it left the game long
+ago, and has agreed to allow it to be released. He does not want to be
+identified, however.
+
+Please do not email me with questions, as I am not familiar with the
+code (beyond how I integrated it with DOW).
+
+I've removed all the code that looks up information in DOW and
+replaced them with stubs. You'll mostly just have to fill in
+URLs and file names.
+
+The code has only been run on linux systems. I suspect it could be
+made to run on others with some effort. You'll need at a minimum Perl
+and a C compiler.
+
+
+   Adam Janin
+   05/20/08

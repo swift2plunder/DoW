@@ -1,0 +1,52 @@
+MISTAKES       Lists some of the schema and code design errors in DOW. The
+               time to correct these is *before* you start adding data.
+
+README         Overview.
+
+cleardow.pl    Clears most of the database entries for a particular turn.
+               Called manually, usually to clean up during debugging.
+
+do_ships.pl    Updates the new modules table nmods and powerrank. Called
+               by postturn.sh.
+
+dow.pm         Common perl code used by cgi and scripts.
+
+dowpw.pl       Generates/updates password entry. Called manually when a
+               new member joins.
+
+dowschema.html Annotated DOW schema.
+
+dowschema.sql  Schema suitable for use with postgresql's \i command.
+
+get_sst.pl     Grabs the SST from the server. Called by postturn.sh.
+
+makedowpw.pl   Rebuilds the .htaccess files from the DOW passwords.
+               Called by updatedow.pl.
+
+postturn.sh    A bunch of random post turn processing. Called by
+               updatedow.pl.
+
+purges.pl      Tries to guess which systems were purges on a particular
+               turn and who was in system at the time. Called by
+               postturn.pl.
+
+rfat.pl        Sends out "Report from All Terminals" requests. Called
+               by postturn.pl.
+
+updatedow.pl   Updates DOW from the TBG server. Called by cron at 2pm MWF.
+
+updatepres.pl  Historical code that updated DOW from the president's own
+               URL. Not currently used.
+
+cs/            Directory for the combat simulator.
+
+dow2/	       Abandoned attempt at dow's replacement.
+
+rs/	       Directory for the route simulator.
+
+tables/	       Database dump of DOW tables that don't contain member-specific
+	       information.
+
+www/	       Directory for all the DOW cgi scripts (the web pages that
+               members actually see).
+
